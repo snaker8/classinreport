@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: gwasaram-report-system
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: ACCESS_PASSWORD
+        sync: false
