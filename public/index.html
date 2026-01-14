@@ -21,6 +21,9 @@
         href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700&family=Pretendard:wght@300;400;500;700&display=swap"
         rel="stylesheet">
 
+    <!-- html2canvas -->
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
     <style>
         body {
             font-family: 'Pretendard', sans-serif;
@@ -453,6 +456,36 @@
                 URL.revokeObjectURL(url);
             };
 
+            const downloadPngReport = async () => {
+                const element = document.getElementById('report-container');
+                if (!element) return;
+
+                // 이미지가 로드될 때까지 잠시 대기 (선택사항)
+                setIsLoading(true);
+
+                try {
+                    // html2canvas 옵션 설정
+                    const canvas = await html2canvas(element, {
+                        scale: 2, // 고해상도를 위해 2배 확대
+                        useCORS: true, // 외부 이미지(있다면) 허용
+                        logging: false, // 디버그 로그 끄기
+                        backgroundColor: '#ffffff', // 배경색 지정
+                        windowWidth: element.scrollWidth,
+                        windowHeight: element.scrollHeight
+                    });
+
+                    const link = document.createElement('a');
+                    link.download = `Report_${studentName}_${new Date().toISOString().slice(0, 10)}.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                } catch (err) {
+                    console.error("PNG Download failed:", err);
+                    alert("PNG 저장 중 오류가 발생했습니다: " + err.message);
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+
             const resetForm = () => {
                 setStudentName('');
                 setClassName('');
@@ -618,8 +651,8 @@
                                             onClick={generateReport}
                                             disabled={isLoading || !studentName || !selectedImage || !password}
                                             className={`w-full py-4 rounded-lg font-bold text-sm tracking-widest uppercase transition-all shadow-md flex items-center justify-center gap-3 ${isLoading || !studentName || !selectedImage || !password
-                                                    ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                                                    : 'bg-slate-900 text-amber-500 hover:bg-slate-800 hover:shadow-lg'
+                                                ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                                                : 'bg-slate-900 text-amber-500 hover:bg-slate-800 hover:shadow-lg'
                                                 }`}
                                         >
                                             {isLoading ? (
@@ -660,6 +693,13 @@
                                             HTML 저장
                                         </button>
                                         <button
+                                            onClick={downloadPngReport}
+                                            className="flex items-center gap-2 bg-emerald-600 text-white px-5 py-2 rounded-full text-xs md:text-sm font-medium hover:bg-emerald-700 shadow-md transition-all"
+                                        >
+                                            <Icon name="Download" size={14} />
+                                            PNG 저장
+                                        </button>
+                                        <button
                                             onClick={() => window.print()}
                                             className="flex items-center gap-2 bg-slate-900 text-white px-5 py-2 rounded-full text-xs md:text-sm font-medium hover:bg-slate-800 shadow-md transition-all"
                                         >
@@ -670,7 +710,7 @@
                                 </div>
 
                                 {/* Report Paper */}
-                                <div className="bg-white w-full max-w-[210mm] mx-auto min-h-[297mm] shadow-2xl overflow-hidden relative print-shadow-none print-w-full print:max-w-none">
+                                <div id="report-container" className="bg-white w-full max-w-[210mm] mx-auto min-h-[297mm] shadow-2xl overflow-hidden relative print-shadow-none print-w-full print:max-w-none">
 
                                     {/* Decorative Accent */}
                                     <div className="absolute top-0 left-0 w-1 md:w-2 h-full bg-amber-500/10 hidden sm:block"></div>
@@ -794,8 +834,8 @@
                                                         src={imagePreview}
                                                         alt="Board"
                                                         className={`w-full h-auto object-contain transition-all duration-500 ${isEnhancedMode
-                                                                ? 'grayscale contrast-[1.2] brightness-105 saturate-0'
-                                                                : ''
+                                                            ? 'grayscale contrast-[1.2] brightness-105 saturate-0'
+                                                            : ''
                                                             }`}
                                                     />
 
@@ -851,8 +891,8 @@
                                     src={imagePreview}
                                     alt="Full View"
                                     className={`max-w-full max-h-full object-contain rounded-sm shadow-2xl ${isEnhancedMode
-                                            ? 'grayscale contrast-[1.2] brightness-105 saturate-0'
-                                            : ''
+                                        ? 'grayscale contrast-[1.2] brightness-105 saturate-0'
+                                        : ''
                                         }`}
                                 />
                                 <div className="mt-4 text-white/60 text-xs">
